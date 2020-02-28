@@ -21,6 +21,7 @@ package org.jboss.threads;
 import static org.jboss.threads.EnhancedQueueExecutor.DEFAULT_HANDLER;
 import static org.jboss.threads.EnhancedQueueExecutor.REGISTER_MBEAN;
 import static org.jboss.threads.EnhancedQueueExecutor.TS_THREAD_CNT_MASK;
+import static org.jboss.threads.EnhancedQueueExecutorBase0.readIntPropertyPrefixed;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -39,11 +40,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.jboss.threads.management.ManageableThreadPoolExecutorService;
 import org.jboss.threads.management.StandardThreadPoolMXBean;
 import org.wildfly.common.Assert;
+import org.wildfly.common.cpu.ProcessorInfo;
 
 /**
  * A striped version of {@link EnhancedQueueExecutor}.
  */
 public final class StripedEnhancedQueueExecutor extends AbstractExecutorService implements ManageableThreadPoolExecutorService {
+    /**
+     * The number of executor stripes
+     */
+    static final int EXECUTOR_STRIPES = readIntPropertyPrefixed("executor-stripes", ProcessorInfo.availableProcessors());
+
     private final List<EnhancedQueueExecutor> executors;
     volatile Runnable terminationTask;
 
@@ -186,7 +193,7 @@ public final class StripedEnhancedQueueExecutor extends AbstractExecutorService 
      * a small thread pool.
      */
     public static final class Builder {
-        private int stripes = 2;
+        private int stripes = EXECUTOR_STRIPES;
         private ThreadFactory threadFactory = Executors.defaultThreadFactory();
         private Runnable terminationTask = NullRunnable.getInstance();
         private Executor handoffExecutor = DEFAULT_HANDLER;
