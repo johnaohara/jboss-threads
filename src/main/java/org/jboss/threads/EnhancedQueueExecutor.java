@@ -1323,7 +1323,7 @@ public final class EnhancedQueueExecutor extends EnhancedQueueExecutorBase6 impl
             processingQueue: for (;;) {
                 long start = System.nanoTime();
                 try {
-                    node = queue.poll(timeoutNanos, TimeUnit.NANOSECONDS);
+                    node = queue.take();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     //TODO: how is this supposed to be handled?
@@ -1525,7 +1525,7 @@ public final class EnhancedQueueExecutor extends EnhancedQueueExecutorBase6 impl
     // =======================================================
 
     private int tryExecute(final Runnable runnable) {
-        if (queue.tryTransfer(runnable)) {
+        if (queue.offer(runnable)) {
             return EXE_OK;
         }
         // no consumers available; maybe we can start one
